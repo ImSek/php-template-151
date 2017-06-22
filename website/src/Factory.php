@@ -1,6 +1,6 @@
 <?php
 
-namespace livio;
+namespace imsek;
 
 class Factory
 {
@@ -9,17 +9,17 @@ class Factory
 	{
 		$this->config = $config;
 	}
-	
+
 	public function getTemplateEngine()
 	{
 		return new SimpleTemplateEngine(__DIR__ . "/../templates/");
 	}
-	
+
 	public function getIndexController()
 	{
-		return new Controller\IndexController($this->getTemplateEngine(), $this->getHomepageService(), $this->getPDO());
+		return new Controller\IndexController($this->getTemplateEngine(), $this->getHomepageService(), $this->getPDO(), $this->getCSRFService());
 	}
-	
+
 	public function getPDO()
 	{
 		return new \PDO(
@@ -28,17 +28,17 @@ class Factory
 				"my-secret-pw",
 				[\PDO::ATTR_ERRMODE => \PDO::ERRMODE_EXCEPTION]);
 	}
-	
+
 	public function getLoginService()
 	{
-		return new  Service\Login\LoginPdoService($this->getPDO());
+		return new  Service\Login\LoginPdoService($this->getPDO(), $this->getPasswordService());
 	}
-	
+
 	public function getHomepageService()
 	{
 		return new  Service\Homepage\HomepagePdoService($this->getPDO());
 	}
-	
+
 	public function getMailer()
 	{
 		return \Swift_Mailer::newInstance(
@@ -47,10 +47,19 @@ class Factory
 				->setPassword("Pe$6A+aprunu")
 				);
 	}
-	
+
 	public function getRegisterService()
 	{
-		return new Service\Register\RegisterPdoService($this->getPDO(), $this->getMailer());
+		return new Service\Register\RegisterPdoService($this->getPDO(), $this->getMailer(), $this->getPasswordService());
 	}
-	
+
+	public function getCSRFService()
+	{
+		return new Service\Security\CSRFProtectionService();
+	}
+
+	public function getPasswordService()
+	{
+		return new Service\Security\PasswordService();
+	}
 }

@@ -1,11 +1,13 @@
 <!Doctype>
 <html>
 <head>
- 	<title>Register</title>
+	<link rel="stylesheet" href="/Design/design.css">
+	<title>Register</title>
 </head>
 <body>
 	<h1>Register</h1>
 	<form method="POST">
+	<?php echo $csrf?>
 		<label>
 			Email:
 			<input type="email" name="email" value="<?= (isset($email)) ? htmlspecialchars($email) : "" ?>" />

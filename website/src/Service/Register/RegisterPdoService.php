@@ -1,5 +1,7 @@
 <?php
-namespace livio\Service\Register;
+namespace imsek\Service\Register;
+
+use imsek\Service\Security\PasswordService;
 
 class RegisterPdoService implements  RegisterService
 {
@@ -8,46 +10,15 @@ class RegisterPdoService implements  RegisterService
 	 */
 	private $pdo;
 	private $mailer;
+	private $passwordService;
 
-	public function __construct(\PDO $pdo, $mailer)
+	public function __construct(\PDO $pdo, $mailer, PasswordService $passwordService)
 	{
 		$this->pdo = $pdo;
 		$this->mailer = $mailer;
+		$this->passwordService = $passwordService;
 	}
-	
-	public function chpw($pw, $url)
-	{
-		if(isset($_SESSION['userid']))
-		{
-			$userid = $_SESSION['userid'];
-			if($url == $this->getactivationCodeById($userid))
-			{
-				$stmt = $this->pdo->prepare("UPDATE `user` SET password=? WHERE id=?");
-				$stmt->bindValue(1,$pw);
-				$stmt->bindValue(2,$userid);
-				$stmt->execute();
-				echo "password has been changed";
-			}
-		}
-		else
-		{
-			echo "you are not nollged in <a href=https://".$_SERVER['HTTP_HOST']."/login>login</a>";
-		}
-	}
-	
-	public function sendCode()
-	{
-		$user = $this->getCurrentUser();
-		$activationCode = $user['activationCode'];
-		$this->mailer->send(
-				\Swift_Message::newInstance("Change PW")
-				->setContentType("text/html")
-				->setFrom(["gibz.module.151@gmail.com" => "WebProject"])
-				->setTo($user['email'])
-				->setBody("<p>Change PW Code:</p> .$activationCode.")
-				);
-	}
-	
+
 	public function acti($url, $userid)
 	{
 		if($url == $this->getactivationCodeById($userid))
@@ -66,22 +37,22 @@ class RegisterPdoService implements  RegisterService
 			return;
 		}
 	}
-	
+		
 	public function reg($email, $pw)
 	{
 		if ($this->userNotExist($email) == true)
 		{
-			$url = $this->generateRandomString();
+			$url = $this->passwordService->generateRandomString();
 			$this->createUser($email, $pw, $url);
 			$this->sendRegistrationEmail($email, $url, $this->getUserIdByEmail($email));
 			echo "email  with register link has been sent to .$email.";
 		}
 		else
 		{
-			echo "user with this email already exists";
-		}	
+			return false;
+		}
 	}
-	
+		
 	private function getUserIdByEmail($email)
 	{
 		$stmt = $this->pdo->prepare("Select * FROM user WHERE email=?");
@@ -93,28 +64,6 @@ class RegisterPdoService implements  RegisterService
 			break;
 		}
 	}
-	
-	private function getCurrentUser()
-	{
-		if(isset($_SESSION['userid']))
-		{
-			$userid = $_SESSION['userid'];
-			$stmt = $this->pdo->prepare("Select * FROM user WHERE id=?");
-			$stmt->bindValue(1, $userid);
-			$stmt->execute();
-			foreach ($stmt as $row)
-			{
-				return $row;
-				break;
-			}
-		}
-		else
-		{
-			echo "you are not nollged in <a href=https://".$_SERVER['HTTP_HOST']."/login>login</a>";
-		}
-		
-	}
-	
 	private function getactivationCodeById($userid)
 	{
 		$stmt = $this->pdo->prepare("Select * FROM user WHERE id=?");
@@ -126,33 +75,40 @@ class RegisterPdoService implements  RegisterService
 			break;
 		}
 	}
-	
-	private function userNotExist($email) {
+		
+	private function userNotExist($email)
+	{
 		$stmt = $this->pdo->prepare("SELECT email FROM user WHERE email=?");
 		$stmt->bindValue(1, $email);
 		$stmt->execute();
-		if($stmt->rowCount() == 0) {
+		if($stmt->rowCount() == 0)
+		{
 			return true;
 		}
-		else {
+		else
+		{
 			return false;
 		}
 	}
-	
-	private function createUser($email,$pw, $url) {
+
+	private function createUser($email,$pw, $url)
+	{
+		$securePW = $this->passwordService->gethash($pw);
 		$stmt = $this->pdo->prepare("INSERT INTO user(right_id,email,password,isActivated,activationCode) VALUES(1,?,?,0,?)");
 		$stmt->bindValue(1, $email);
-		$stmt->bindValue(2, $pw);
+		$stmt->bindValue(2, $securePW);
 		$stmt->bindValue(3, $url);
 		$stmt->execute();
-		if($stmt->errorCode()==="00000") {
+		if($stmt->errorCode()==="00000")
+		{
 			return $url;
 		}
-		else {
+		else
+		{
 			return null;
 		}
 	}
-	
+
 	private function sendRegistrationEmail($email, $url, $userid)
 	{
 		$this->mailer->send(
@@ -160,18 +116,42 @@ class RegisterPdoService implements  RegisterService
 				->setContentType("text/html")
 				->setFrom(["gibz.module.151@gmail.com" => "WebProject"])
 				->setTo($email)
-				->setBody("Registrierungsformular<br><a href=https://".$_SERVER['HTTP_HOST']."/activate?url=".$url."&userid=".$userid.">Link</a>")
+				->setBody("Registrierungsformular<br><a href=https://".$_SERVER['HTTP_HOST']."/activate?url=".$url."&user_id=".$userid.">Link</a>")
 				);
 	}
-	
-	private function generateRandomString($length = 20)
+	private function getUserByEmail($email)
 	{
-		$characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
-		$charactersLength = strlen($characters);
-		$randomString = '';
-		for ($i = 0; $i < $length; $i++) {
-			$randomString .= $characters[rand(0, $charactersLength - 1)];
+		$stmt = $this->pdo->prepare("Select * FROM user WHERE email=?");
+		$stmt->bindValue(1, $email);
+		$stmt->execute();
+		foreach ($stmt as $row)
+		{
+			return $row;
+			break;
 		}
-		return $randomString;
+	}
+
+	public function chpw($pw, $url)
+	{
+		$securePW = $this->passwordService->gethash($pw);
+		$stmt = $this->pdo->prepare("UPDATE `user` SET password=? WHERE activationCode=?");
+		$stmt->bindValue(1,$securePW);
+		$stmt->bindValue(2,$url);
+		$stmt->execute();
+	}
+
+	public function sendCode($email)
+	{
+		$user = $this->getUserByEmail($email);
+		$activationCode = $user['activationCode'];
+		$this->mailer->send(
+				\Swift_Message::newInstance("Change PW")
+				->setContentType("text/html")
+				->setFrom(["gibz.module.151@gmail.com" => "WebProject"])
+				->setTo($user['email'])
+				->setBody("<p>Change PW Code:</p> $activationCode")
+				);
 	}
 }
+
+	

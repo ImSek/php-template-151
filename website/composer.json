@@ -1,5 +1,5 @@
 {
-    "name": "livio/Datenbankprojekt",
+    "name": "imsek/Datenbankprojekt",
     "type": "project",
     "autoload": {
         "psr-4": {

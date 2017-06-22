@@ -1,5 +1,5 @@
 <?php
-namespace livio\Service\Register;
+namespace imsek\Service\Register;
 
 Interface RegisterService
 {

@@ -1,8 +1,9 @@
 <?php
-namespace livio\Service\Login;
+namespace imsek\Service\Login;
 
 Interface LoginService
 {
 	public function authenticate($username, $password);
-	public function getuseridbyemail($email);
+	public function getUserIdByEmail($email);
+	public function getPasswordByEmail($email);
 }

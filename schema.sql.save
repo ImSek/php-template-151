@@ -49,6 +49,6 @@ CREATE TABLE `user` (
   UNIQUE KEY `email` (`email`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-
+file:///home/gibz/Downloads/app.sql 
 
 -- 2017-06-22 20:15:28
