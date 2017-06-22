@@ -16,7 +16,7 @@
 		<label>new Password:
 			<input type="password" name="password">
 		</label>
-		<input type="submit" name="changepw" value="Change Password">
+		<input class="button" type="submit" name="changepw" value="Change Password">
 	</form>
 	<?php
 	}
@@ -24,12 +24,12 @@
 	{?>
 	<form method="POST">
 	<?php echo $csrf?>
-		<label>Enter the e-mail adress of you account. You will receive a code there that you need to enter to reset you password.</label>
+		<label>Enter your Email. We will send you that you need to enter to reset your password.</label>
 		<div>
 			<label>Email:
 				<input type="email" name="email"/>
 			</label>
-			<input type="submit" name="Send" value="Send">
+			<input class="button" type="submit" name="Send" value="Send">
 		</div>
 	</form>
 	<?php 

@@ -10,12 +10,12 @@ class LoginPdoService implements  LoginService
 	 */
 	private $pdo;
 
-	private $passwordService;
+	private $pwService;
 
 	public function __construct(\PDO $pdo, PasswordService $passwordService)
 	{
 		$this->pdo = $pdo;
-		$this->passwordService = $passwordService;
+		$this->pwService = $passwordService;
 	}
 
 	public function authenticate($username, $password)
@@ -25,7 +25,7 @@ class LoginPdoService implements  LoginService
 		{
 			return false;
 		}
-		if (!$this->passwordService->verify($password, $hash))
+		if (!$this->pwService->verify($password, $hash))
 		{
 			return false;
 		}

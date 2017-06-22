@@ -16,7 +16,7 @@
 			Passwort:
 			<input type="password" name="password">
 		</label>
-		<input type="submit" name="login" value="Login">
+		<input class="button " type="submit" name="login" value="Login">
 	</form>
 	<a href="changepw">Forgot Password?</a>
 </body>

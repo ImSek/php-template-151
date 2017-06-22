@@ -10,10 +10,12 @@ require_once("../vendor/autoload.php");
 $config = parse_ini_file(__DIR__ . "/../config.ini", true);
 $factory = new Factory($config);
 $tmpl = $factory->getTemplateEngine();
+
 if($_SERVER["REQUEST_METHOD"] == "PUT")
 {
 	die();
 }
+
 if(strpos($_SERVER["REQUEST_URI"], '/activate') !== false)
 {
 	if($_SERVER["REQUEST_METHOD"] == "GET")

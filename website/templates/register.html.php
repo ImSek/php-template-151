@@ -16,7 +16,7 @@
 			Passwort:
 			<input type="password" name="password">
 		</label>
-		<input type="submit" name="register" value="register">
+		<input class="button" type="submit" name="register" value="register">
 	</form>
 </body>
 </html>
