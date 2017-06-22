@@ -1,6 +1,6 @@
 <?php
 
-namespace ihrname;
+namespace livio;
 
 /**
  * Simple Template-Engine which provides arguments into a template,
