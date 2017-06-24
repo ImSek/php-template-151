@@ -19,8 +19,7 @@ CREATE TABLE `like` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 INSERT INTO `like` (`id`, `user_id`, `post_id`, `isDislike`) VALUES
-(1,	1,	1,	0),
-(4,	17,	1,	0);
+(1,	1,	1,	0);
 
 DROP TABLE IF EXISTS `post`;
 CREATE TABLE `post` (
@@ -45,10 +44,10 @@ CREATE TABLE `user` (
   `username` varchar(255) NOT NULL,
   `isActivated` tinyint(4) NOT NULL,
   `activationCode` varchar(255) NOT NULL,
+  `right_id` int(11) NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `email` (`email`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 
-
--- 2017-06-22 20:15:28
+-- 2017-06-24 11:42:57
